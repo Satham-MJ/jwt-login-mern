@@ -6,21 +6,26 @@ const jwt = require("jsonwebtoken");
 Route.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
-  const user = await Users.findOne({ username });
-  if (!user) {
-    res.json({ error: "User Not Found.." });
-  } else {
-    const status = await bcrypt.compare(password, user.password);
-    if (!status) {
-      res.json({ error: "Invalid User Name / Password" });
+  try {
+    const user = await Users.findOne({ username });
+    if (!user) {
+      res.json({ error: "User Not Found.." });
     } else {
-      var token = jwt.sign(
-        { user: user._id, name: user.name },
-        process.env.ENCRYPT_KEY
-      );
-      //   res.header("auth", token).send(token);
-      res.json({ authToken: token });
+      const status = await bcrypt.compare(password, user.password);
+      if (!status) {
+        res.json({ error: "Invalid User Name / Password" });
+      } else {
+        var token = jwt.sign(
+          { user: user._id, name: user.name },
+          process.env.ENCRYPT_KEY
+        );
+        //   res.header("auth", token).send(token);
+        res.json({ authToken: token });
+        //return res.json({ message: "hai" });
+      }
     }
+  } catch (error) {
+    res.json(error);
   }
 });
 Route.post("/register", async (req, res) => {
